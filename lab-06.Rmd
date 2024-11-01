@@ -27,11 +27,19 @@ diamonds <- diamonds %>% rename(
 ## Exercise 1
 
 ```{r}
-# Do some preliminary investigations & cleaning
+diamonds_clean <- diamonds %>% filter(length_mm != 0 & width_mm != 0 & depth_mm != 0)
+diamonds_dirty <- diamonds %>% filter(length_mm == 0 | width_mm == 0 | depth_mm == 0)
+diamonds_clean %>% count(cut)
+diamonds_clean %>% count(color)
+diamonds_clean %>% count(clarity)
+diamonds_clean %>% summarise(mean(carat), median(carat), mean(price))
+diamonds_clean %>% select(price, cut) %>% 
+  group_by(cut) %>% summarise(mean(price, na.rm  = TRUE))
+ggplot(data = diamonds_clean, mapping = aes(x = cut)) +
+  geom_bar()
 
-
-
-
+ggplot(data = diamonds_clean, mapping = aes(x = color)) +
+  geom_bar()
 ```
 
 
@@ -43,22 +51,24 @@ diamonds <- diamonds %>%
   mutate(table_mm = table_pct * width_mm / 100)
 
 # Overall table_mm arithmetic mean?
-
+diamonds %>% summarise(mean(table_mm, na.rm = TRUE))
 
 
 
 
 
 # table_mm arithmetic mean within each clarity category
+diamonds %>% group_by(clarity) %>% summarise(mean(table_mm, na.rm = TRUE))
 
-
-
-
-
-
+diamonds %>% summarise(
+  across(where(is.numeric), \(x) mean(x))) %>% 
+  rename("avg_price" = price,
+         "avg_length" = length_mm,
+         "avg_width" = width_mm,
+         "avg_depth" = depth_mm 
+         )
 ```
-
-_Add your comment here_
+Mean table length decreases as level of clarity increases.
 
 ```{r}
 # calculate the arithmetic mean across all numeric variables
